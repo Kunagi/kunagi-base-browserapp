@@ -1,10 +1,7 @@
 (ns kunagi-base-browserapp.http-async
-  (:require-macros
-   [cljs.core.async.macros :as asyncm :refer (go go-loop)])
   (:require
-   [cljs.core.async :as async :refer (<! >! put! chan)]
    [re-frame.core :as rf]
-   [taoensso.sente  :as sente :refer (cb-success?)]
+   [taoensso.sente  :as sente]
 
    [kunagi-base.appmodel :refer [def-module]]
    [kunagi-base.startup :refer [def-init-function]]))
@@ -34,7 +31,7 @@
   db)
 
 (defn- on-data-received [db data]
-  (tap> [:!!! ::data-received data])
+  ;; (tap> [:!!! ::data-received data])
   (if (= :chsk/recv (-> data :id))
     (let [event (-> data :event (second))
           event-id (first event)]
@@ -54,7 +51,7 @@
 (rf/reg-event-db
  ::state-changed
  (fn [db [_ state]]
-   (tap> [:!!! ::sente-state-changed state])
+   (tap> [:dbg ::sente-state-changed state])
    (-> db
        (assoc-in [:http-async/sente-state] state))))
 
@@ -78,3 +75,8 @@
  (fn [db [_ event]]
    (send! db [:kunagi-base/event event])
    db))
+
+(rf/reg-sub
+ :http-async/state
+ (fn [db _]
+   (get db :http-async/sente-state)))

@@ -1,0 +1,11 @@
+{:own [witek/bindscript
+       kunagi/kunagi-base
+       kunagi/mui-commons]
+
+ :foreign {
+           ;; cljc
+           com.taoensso/sente        {:mvn/version "1.13.1"}
+
+           ;; cljs
+           cljs-ajax                 {:mvn/version "0.8.0"}
+           tongue                    {:mvn/version "0.2.7"}}}

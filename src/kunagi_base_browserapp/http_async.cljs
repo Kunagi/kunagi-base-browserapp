@@ -76,6 +76,14 @@
    (send! db [:kunagi-base/event event])
    db))
 
+
+(rf/reg-event-db
+ :auth/server-event-not-permitted
+ (fn [db [ event]]
+   (tap> [:wrn ::server-event-not-permitted event])
+   db))
+
+
 (rf/reg-sub
  :http-async/state
  (fn [db _]

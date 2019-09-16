@@ -10,11 +10,11 @@
     (if open?
       [:> mui/IconButton
        {:disabled true
-        :title "Connected"
+        :title "Online"
         :style {:color :grey}}
        [:> icons/Link]]
       [:> mui/IconButton
        {:disabled true
-        :title "Not Connected"
+        :title "Offline"
         :style {:color :red}}
        [:> icons/LinkOff]])))

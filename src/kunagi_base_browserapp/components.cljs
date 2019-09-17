@@ -14,13 +14,12 @@
       (user-perms req-perm))))
 
 
-(defn DevModeBoundary [& contents]
+(defn DevModeBoundary [& dev-only-components]
   (let [config (<subscribe [:browserapp/config])
-        devmode? (-> config :dev-mode?)]
+        dev-mode? (-> config :dev-mode?)]
     (into
      [:div.DevModeBoundary]
-     (when devmode?
-       contents))))
+     (when dev-mode? dev-only-components))))
 
 
 

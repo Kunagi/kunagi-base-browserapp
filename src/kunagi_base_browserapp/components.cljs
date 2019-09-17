@@ -3,7 +3,8 @@
    ["@material-ui/core" :as mui]
    ["@material-ui/icons" :as icons]
    [mui-commons.components :as muic]
-   [mui-commons.api :refer [<subscribe]]))
+   [mui-commons.api :refer [<subscribe]]
+   [kunagi-base-browserapp.subs]))
 
 
 (defn- user-has-permission? [req-perm]
@@ -11,6 +12,16 @@
     (let [user-perms (or (-> user :user/perms)
                          #{})]
       (user-perms req-perm))))
+
+
+(defn DevModeBoundary [& contents]
+  (let [config (<subscribe [:browserapp/config])
+        devmode? (-> config :dev-mode?)]
+    (into
+     [:div.DevModeBoundary]
+     (when devmode?
+       contents))))
+
 
 
 (defn PermissionBoundary [req-perm protected-component alternative-component]

@@ -83,6 +83,12 @@
    (tap> [:wrn ::server-event-not-permitted event])
    db))
 
+(rf/reg-event-db
+ :auth/server-command-not-permitted
+ (fn [db [ event]]
+   (tap> [:wrn ::server-command-not-permitted event])
+   db))
+
 
 (rf/reg-sub
  :http-async/state

@@ -4,13 +4,17 @@
    [taoensso.sente  :as sente]))
 
 
-(defn connect []
+(defn connect! []
   (tap> [:dbg ::connect])
   (let [{:keys [chsk ch-recv send-fn state] :as socket}
         (sente/make-channel-socket-client! "/chsk" {:type :auto})]
     (add-watch state :state->db (fn [_ _ _ state] (rf/dispatch [::state-changed state])))
     (sente/start-client-chsk-router! ch-recv #(rf/dispatch [::data-received %]))
     socket))
+
+
+(defn start [db]
+  (assoc db :comm-async/sente-socket (connect!)))
 
 
 (defn- on-event-received [db event]
@@ -40,25 +44,25 @@
  (fn [db [_ state]]
    (tap> [:dbg ::sente-state-changed state])
    (-> db
-       (assoc-in [:http-async/sente-state] state))))
+       (assoc-in [:comm-async/sente-state] state))))
 
 
 (defn- send! [db message]
-  (if (get-in db [:http-async/sente-state :open?])
-    (let [send-fn (get-in db [:http-async/sente-socket :send-fn])]
+  (if (get-in db [:comm-async/sente-state :open?])
+    (let [send-fn (get-in db [:comm-async/sente-socket :send-fn])]
       (send-fn message))
-    (.setTimeout js/window #(rf/dispatch [:http-async/send message]) 1000)))
+    (.setTimeout js/window #(rf/dispatch [:comm-async/send message]) 1000)))
 
 
 (rf/reg-event-db
- :http-async/send
+ :comm-async/send
  (fn [db [_ message]]
    (send! db message)
    db))
 
 
 (rf/reg-event-db
- :http-async/send-event
+ :comm-async/send-event
  (fn [db [_ event]]
    (send! db [:kunagi-base/event event])
    db))
@@ -78,6 +82,6 @@
 
 
 (rf/reg-sub
- :http-async/state
+ :comm-async/state
  (fn [db _]
-   (get db :http-async/sente-state)))
+   (get db :comm-async/sente-state)))

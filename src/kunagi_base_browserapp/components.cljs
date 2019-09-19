@@ -30,8 +30,8 @@
      alternative-component)])
 
 
-(defn ConnectionStatusIndicator []
-  (let [state (<subscribe [:http-async/state])
+(defn CommAsyncStatusIndicator []
+  (let [state (<subscribe [:comm-async/state])
         open? (-> state :open?)]
     (if open?
       [:> mui/IconButton

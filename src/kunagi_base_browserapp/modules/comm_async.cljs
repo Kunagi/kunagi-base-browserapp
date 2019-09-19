@@ -7,10 +7,10 @@
 
 
 (def-module
-  {:module/id ::http-async})
+  {:module/id ::comm-async})
 
 
 (def-init-function
   {:init-function/id ::connect
-   :init-function/module [:module/ident :http-async]
-   :init-function/f #(assoc % :http-async/sente-socket (impl/connect))})
+   :init-function/module [:module/ident :comm-async]
+   :init-function/f impl/start})

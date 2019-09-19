@@ -1,30 +1,16 @@
-(ns kunagi-base-browserapp.http-async
+(ns kunagi-base-browserapp.modules.comm-async.api
   (:require
    [re-frame.core :as rf]
-   [taoensso.sente  :as sente]
-
-   [kunagi-base.appmodel :refer [def-module]]
-   [kunagi-base.startup :refer [def-init-function]]))
+   [taoensso.sente  :as sente]))
 
 
-(def-module
-  {:module/id ::http-async})
-
-
-(defn- connect []
+(defn connect []
   (tap> [:dbg ::connect])
   (let [{:keys [chsk ch-recv send-fn state] :as socket}
         (sente/make-channel-socket-client! "/chsk" {:type :auto})]
     (add-watch state :state->db (fn [_ _ _ state] (rf/dispatch [::state-changed state])))
     (sente/start-client-chsk-router! ch-recv #(rf/dispatch [::data-received %]))
     socket))
-
-
-
-(def-init-function
-  {:init-function/id ::connect
-   :init-function/module [:module/ident :http-async]
-   :init-function/f #(assoc % :http-async/sente-socket (connect))})
 
 
 (defn- on-event-received [db event]

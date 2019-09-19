@@ -1,0 +1,16 @@
+(ns kunagi-base-browserapp.modules.comm-async
+  (:require
+   [kunagi-base.appmodel :refer [def-module]]
+   [kunagi-base.modules.startup :refer [def-init-function]]
+
+   [kunagi-base-browserapp.modules.comm-async.api :as impl]))
+
+
+(def-module
+  {:module/id ::http-async})
+
+
+(def-init-function
+  {:init-function/id ::connect
+   :init-function/module [:module/ident :http-async]
+   :init-function/f #(assoc % :http-async/sente-socket (impl/connect))})

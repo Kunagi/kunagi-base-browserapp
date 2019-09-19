@@ -23,6 +23,7 @@
 
 (def-init-function
   {:init-function/id ::connect
+   :init-function/module [:module/ident :http-async]
    :init-function/f #(assoc % :http-async/sente-socket (connect))})
 
 

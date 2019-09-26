@@ -4,6 +4,8 @@
    [re-frame.core :as rf]
    [ajax.core :as ajax]
 
+   [kunagi-base.auth.api :as auth]
+   [kunagi-base.context :as context]
    [kunagi-base.appmodel :as am]))
 
 
@@ -74,7 +76,8 @@
 
 (defn- request-asset-via-comm-async! [asset-pool asset-path]
   (let [asset-pool-ident (-> asset-pool :asset-pool/ident)]
-    (rf/dispatch [:comm-async/send-event [:assets/asset-requested [asset-pool-ident asset-path]]])))
+    (rf/dispatch [:comm-async/send-event
+                  [:assets/asset-requested asset-pool-ident asset-path]])))
 
 
 (defn- request-asset-from-pool! [asset-pool asset-path]
@@ -84,9 +87,11 @@
 
 
 (defn- request-startup-assets-from-pool
-  [asset-pool]
-  (doseq [asset-path (-> asset-pool :asset-pool/request-on-startup)]
-    (request-asset-from-pool! asset-pool asset-path)))
+  [asset-pool context]
+  (let [req-perms (-> asset-pool :asset-pool/req-perms)]
+    (if (auth/context-has-permissions? context req-perms)
+      (doseq [asset-path (-> asset-pool :asset-pool/request-on-startup)]
+        (request-asset-from-pool! asset-pool asset-path)))))
 
 
 (defn- q-asset-pools-with-request-on-startup []
@@ -97,7 +102,8 @@
 
 (defn request-startup-assets [app-db]
   (doseq [[asset-pool-id] (am/q! (q-asset-pools-with-request-on-startup))]
-    (request-startup-assets-from-pool (am/entity! asset-pool-id)))
+    (request-startup-assets-from-pool (am/entity! asset-pool-id)
+                                      (context/from-rf-db app-db)))
   app-db)
 
 

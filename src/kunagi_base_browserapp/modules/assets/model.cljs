@@ -27,4 +27,5 @@
 
 
 (defn def-asset-pool [asset-pool]
-  (am/register-entity :asset-pool asset-pool))
+  (am/register-entity :asset-pool asset-pool)
+  (impl/reg-sub-for-asset-pool asset-pool))

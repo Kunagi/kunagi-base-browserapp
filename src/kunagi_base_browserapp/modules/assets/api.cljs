@@ -105,4 +105,9 @@
   (request-asset-from-pool! (am/entity! [:asset-pool/ident asset-ident]) asset-path))
 
 
-(defn register-rf-subscriptions [app-db])
+(defn reg-sub-for-asset-pool [asset-pool]
+  (let [asset-pool-ident (-> asset-pool :asset-pool/ident)]
+    (rf/reg-sub
+     asset-pool-ident
+     (fn [db [_ asset-path]]
+       (get-in db [:assets/asset-pools asset-pool-ident asset-path])))))

@@ -9,9 +9,15 @@
     (am/entity! [:page/ident page-ident])))
 
 
-(defn activate-page [db page-ident]
-  ;; TODO action listeners
-  (assoc db :desktop/current-page-ident page-ident))
+(defn activate-page
+  [db page-ident page-args]
+  (let [page (am/entity! [:page/ident page-ident])
+        on-activate-f (or (-> page :page/on-activate-f)
+                          (fn [db page-args] db))]
+    (-> db
+        (assoc :desktop/current-page-ident page-ident)
+        (assoc-in [:desktop/pages-args page-ident] page-args)
+        (on-activate-f page-args))))
 
 
 (rf/reg-sub
@@ -20,6 +26,21 @@
    (or
     (get db :desktop/current-page-ident)
     :index)))
+
+
+(rf/reg-sub
+ :desktop/pages-args
+ (fn [db]
+   (get db :desktop/pages-args)))
+
+
+(rf/reg-sub
+ :desktop/current-page-args
+ (fn [_]
+   [(rf/subscribe [:desktop/current-page-ident])
+    (rf/subscribe [:desktop/pages-args])])
+ (fn [[page-ident pages-args]]
+   (get pages-args page-ident)))
 
 
 (rf/reg-sub
@@ -52,5 +73,5 @@
 
 (rf/reg-event-db
  :desktop/activate-page
- (fn [db [_ page-ident]]
-   (activate-page db page-ident)))
+ (fn [db [_ page-ident page-args]]
+   (activate-page db page-ident page-args)))

@@ -14,7 +14,8 @@
   {:page/ident {:uid? true :spec simple-keyword?}
    :page/workarea {:req true}
    :page/toolbar {}
-   :page/title-text {}})
+   :page/title-text {}
+   :page/on-activate-f {:spec fn?}})
 
 
 (defn def-page [page]

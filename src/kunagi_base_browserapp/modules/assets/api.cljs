@@ -11,24 +11,24 @@
 
 ;;;
 
-(defn- on-asset-updated [asset-pool-ident asset-path asset]
-  (localstorage/on-asset-updated asset-pool-ident asset-path asset))
+(defn- on-asset-updated [asset asset-path asset]
+  (localstorage/on-asset-updated asset asset-path asset))
 
 
 ;;; api
 
-(defn asset [db asset asset-path]
-  (get-in db [:assets/asset-pools asset asset-path]))
+(defn asset [db asset-pool-ident asset-path]
+  (get-in db [:assets/asset-pools asset-pool-ident asset-path]))
 
 
-(defn set-asset [db asset-pool-ident asset-path asset]
+(defn set-asset [db asset-pool-ident asset-path new-value]
   ;; TODO assert spec of asset
-  (let [old-asset (asset asset-pool-ident asset-path)]
-    (if (= old-asset asset)
+  (let [old-value (asset db asset-pool-ident asset-path)]
+    (if (= old-value new-value)
       db
-      (let [asset (am/entity! [:asset-pool-ident asset-pool-ident])]
-        (on-asset-updated asset asset-path asset)
-        (assoc-in db [:assets/asset-pools asset-pool-ident asset-path] asset)))))
+      (let [asset (am/entity! [:asset-pool/ident asset-pool-ident])]
+        (on-asset-updated asset asset-path new-value)
+        (assoc-in db [:assets/asset-pools asset-pool-ident asset-path] new-value)))))
 
 
 (defn update-asset [db asset-pool-ident asset-path update-f]

@@ -31,13 +31,12 @@
 
 (defn load-asset [asset-pool asset-path]
   (when (-> asset-pool :asset-pool/localstorage?)
-    (tap> [:!!! ::load-asset (storage-key asset-pool asset-path)])
     (when-let [s (get-item (storage-key asset-pool asset-path))]
-      (tap> [:!!! ::load-asset s])
+      (tap> [:dbg ::load-asset s])
       (read-string s))))
 
 
 (defn on-asset-updated [asset-pool asset-path value]
   (when (-> asset-pool :asset-pool/localstorage?)
-    (tap> [:!!! ::storing asset-pool asset-path value])
+    (tap> [:dbg ::store-asset asset-pool asset-path])
     (set-item! (storage-key asset-pool asset-path) (pr-str value))))

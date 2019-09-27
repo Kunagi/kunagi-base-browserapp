@@ -21,6 +21,12 @@
 
 
 (def-init-function
+  {:init-function/id ::load-startup-assets
+   :init-function/module [:module/ident :assets]
+   :init-function/f impl/load-startup-assets})
+
+
+(def-init-function
   {:init-function/id ::request-startup-assets
    :init-function/module [:module/ident :assets]
    :init-function/f impl/request-startup-assets})

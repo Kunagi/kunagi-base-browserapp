@@ -11,8 +11,8 @@
 
 ;;;
 
-(defn- on-asset-updated [asset asset-path asset]
-  (localstorage/on-asset-updated asset asset-path asset))
+(defn- on-asset-updated [asset-pool asset-path asset]
+  (localstorage/on-asset-updated asset-pool asset-path asset))
 
 
 ;;; api
@@ -26,19 +26,22 @@
   (let [old-value (asset db asset-pool-ident asset-path)]
     (if (= old-value new-value)
       db
-      (let [asset (am/entity! [:asset-pool/ident asset-pool-ident])]
-        (on-asset-updated asset asset-path new-value)
+      (let [asset-pool (am/entity! [:asset-pool/ident asset-pool-ident])]
+        (on-asset-updated asset-pool asset-path new-value)
         (assoc-in db [:assets/asset-pools asset-pool-ident asset-path] new-value)))))
 
 
 (defn update-asset [db asset-pool-ident asset-path update-f]
-  (if-let [asset (asset db asset-pool-ident asset-path)]
-    (set-asset db asset-pool-ident asset-path (update-f asset))
-    (throw (ex-info (str "Asset "
-                         (pr-str [asset-pool-ident asset-path])
-                         " is not loaded. Updating failed.")
-                    {:asset-pool-ident asset-pool-ident
-                     :asset-path asset-path}))))
+  (tap> [:!!! ::update-asset asset-pool-ident asset-path update-f])
+  (let [value (asset db asset-pool-ident asset-path)]
+    (set-asset db asset-pool-ident asset-path (update-f value))))
+  ;; (if-let [asset (asset db asset-pool-ident asset-path)]
+  ;;   (set-asset db asset-pool-ident asset-path (update-f asset))
+  ;;   (throw (ex-info (str "Asset "
+  ;;                        (pr-str [asset-pool-ident asset-path])
+  ;;                        " is not loaded. Updating failed.")
+  ;;                   {:asset-pool-ident asset-pool-ident
+  ;;                    :asset-path asset-path}))))
 
 
 ;;; re-frame
@@ -119,6 +122,10 @@
     (request-asset-via-comm-async! asset-pool asset-path)))
 
 
+(defn request-asset! [asset-ident asset-path]
+  (request-asset-from-pool! (am/entity! [:asset-pool/ident asset-ident]) asset-path))
+
+
 (defn- request-startup-assets-from-pool
   [asset-pool context]
   (let [req-perms (-> asset-pool :asset-pool/req-perms)]
@@ -140,8 +147,30 @@
   app-db)
 
 
-(defn request-asset! [asset-ident asset-path]
-  (request-asset-from-pool! (am/entity! [:asset-pool/ident asset-ident]) asset-path))
+(defn- load-startup-assets-from-pool
+  [db asset-pool]
+  (reduce
+   (fn [db asset-path]
+     (set-asset db
+                (-> asset-pool :asset-pool/ident)
+                asset-path
+                (localstorage/load-asset asset-pool asset-path)))
+   db
+   (-> asset-pool :asset-pool/load-on-startup)))
+
+
+(defn- q-asset-pools-with-load-on-startup []
+  '[:find ?e
+    :where
+    [?e :asset-pool/load-on-startup _]])
+
+
+(defn load-startup-assets [app-db]
+  (reduce
+   (fn [app-db [asset-pool-id]]
+     (load-startup-assets-from-pool app-db (am/entity! asset-pool-id)))
+   app-db
+   (am/q! (q-asset-pools-with-load-on-startup))))
 
 
 (defn reg-sub-for-asset-pool [asset-pool]

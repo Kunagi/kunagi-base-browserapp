@@ -17,7 +17,9 @@
   {:asset-pool/ident {:uid? true :spec qualified-keyword?}
    :asset-pool/req-perms {:spec (s/coll-of qualified-keyword?)}
    :asset-pool/request-on-startup {:spec (s/coll-of string?)}
-   :asset-pool/dir-path {:spec string?}})
+   :asset-pool/load-on-startup {:spec (s/coll-of string?)}
+   :asset-pool/url-path {:spec string?}
+   :asset-pool/localstorage {:spec boolean?}})
 
 
 (def-init-function

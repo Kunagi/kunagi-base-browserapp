@@ -6,13 +6,47 @@
 
    [kunagi-base.auth.api :as auth]
    [kunagi-base.context :as context]
-   [kunagi-base.appmodel :as am]))
+   [kunagi-base.appmodel :as am]
+   [kunagi-base-browserapp.modules.assets.localstorage :as localstorage]))
 
+;;;
+
+(defn- on-asset-updated [asset-pool-ident asset-path asset]
+  (localstorage/on-asset-updated asset-pool-ident asset-path asset))
+
+
+;;; api
+
+(defn asset [db asset asset-path]
+  (get-in db [:assets/asset-pools asset asset-path]))
+
+
+(defn set-asset [db asset-pool-ident asset-path asset]
+  ;; TODO assert spec of asset
+  (let [old-asset (asset asset-pool-ident asset-path)]
+    (if (= old-asset asset)
+      db
+      (let [asset (am/entity! [:asset-pool-ident asset-pool-ident])]
+        (on-asset-updated asset asset-path asset)
+        (assoc-in db [:assets/asset-pools asset-pool-ident asset-path] asset)))))
+
+
+(defn update-asset [db asset-pool-ident asset-path update-f]
+  (if-let [asset (asset db asset-pool-ident asset-path)]
+    (set-asset db asset-pool-ident asset-path (update-f asset))
+    (throw (ex-info (str "Asset "
+                         (pr-str [asset-pool-ident asset-path])
+                         " is not loaded. Updating failed.")
+                    {:asset-pool-ident asset-pool-ident
+                     :asset-path asset-path}))))
+
+
+;;; re-frame
 
 (rf/reg-sub
  :assets/asset
  (fn [db [_ asset-pool-ident asset-path]]
-   (get-in db [:assets/asset-pools asset-pool-ident asset-path])))
+   (asset db asset-pool-ident asset-path)))
 
 
 (rf/reg-event-db
@@ -21,7 +55,7 @@
                     asset-path
                     data]}]]
    (tap> [:dbg ::asset-received asset-pool-ident asset-path])
-   (assoc-in db [:assets/asset-pools asset-pool-ident asset-path] data)))
+   (set-asset db asset-pool-ident asset-path data)))
 
 
 (rf/reg-event-db
@@ -35,9 +69,8 @@
                        :asset-path asset-path
                        :url url})]
      (tap> [:wrn ::asset-request-failed error])
-     (assoc-in db
-               [:assets/asset-pools asset-pool-ident asset-path]
-               [:resource/error error]))))
+     ;; TODO display error to user
+     db)))
 
 
 (defn- ajax-error-handler [asset-pool-ident asset-path url]
@@ -116,4 +149,6 @@
     (rf/reg-sub
      asset-pool-ident
      (fn [db [_ asset-path]]
-       (get-in db [:assets/asset-pools asset-pool-ident asset-path])))))
+       (asset db asset-pool-ident asset-path)))))
+
+

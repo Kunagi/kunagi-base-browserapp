@@ -11,10 +11,12 @@
                  :main-opts ["--main" "figwheel.main" "--build" "dev"]}},
  :deps {cljs-ajax {:mvn/version "0.8.0"},
         tongue {:mvn/version "0.2.7"},
+        com.cemerick/url {:mvn/version "0.1.1"},
         com.taoensso/sente {:mvn/version "1.13.1"},
         kunagi/kunagi-base {:local/root "../kunagi-base"},
         kunagi/mui-commons {:local/root "../mui-commons"},
         org.clojure/clojure {:mvn/version "1.10.0"},
+        venantius/accountant {:mvn/version "0.2.4"},
         witek/bindscript {:local/root "../bindscript"}},
  :paths ["src"]}
 

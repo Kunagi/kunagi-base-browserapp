@@ -7,5 +7,7 @@
            com.taoensso/sente        {:mvn/version "1.13.1"}
 
            ;; cljs
+           venantius/accountant      {:mvn/version "0.2.4"}
+           com.cemerick/url          {:mvn/version "0.1.1"}
            cljs-ajax                 {:mvn/version "0.8.0"}
            tongue                    {:mvn/version "0.2.7"}}}

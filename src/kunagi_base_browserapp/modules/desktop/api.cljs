@@ -1,7 +1,26 @@
 (ns kunagi-base-browserapp.modules.desktop.api
   (:require
+   [clojure.spec.alpha :as s]
+   [clojure.string :as str]
    [re-frame.core :as rf]
-   [kunagi-base.appmodel :as am]))
+   [accountant.core :as accountant]
+   [cemerick.url :refer (url url-encode)]
+   [kunagi-base.utils :as utils]
+   [kunagi-base.appmodel :as am]
+   [kunagi-base-browserapp.utils :refer [parse-location-params]]))
+
+
+(s/def :desktop/page-ident simple-keyword?)
+(s/def :desktop/page-args map?)
+
+
+(defn- parse-location []
+  (let [pathname (.. js/document -location -pathname)
+        page (.substring pathname 4)
+        page (if (empty? page) "index" page)
+        page-ident (keyword page)
+        page-args (parse-location-params)]
+    [page-ident page-args]))
 
 
 (defn page [page-ident]
@@ -9,15 +28,44 @@
     (am/entity! [:page/ident page-ident])))
 
 
-(defn activate-page
+(defn navigate! [page-ident page-args]
+  (accountant/navigate!
+   (str "/ui/"
+        (when-not (= :index page-ident)
+          (url-encode (name page-ident)))
+        (when-not (empty? page-args)
+          (reduce
+           (fn [s [k v]]
+             (str s
+                  (if (empty? s) "?" "&")
+                  (url-encode (name k))
+                  "="
+                  (url-encode v)))
+           ""
+           page-args)))))
+
+
+(defn- activate-page
   [db page-ident page-args]
-  (let [page (am/entity! [:page/ident page-ident])
-        on-activate-f (or (-> page :page/on-activate-f)
-                          (fn [db page-args] db))]
-    (-> db
-        (assoc :desktop/current-page-ident page-ident)
-        (assoc-in [:desktop/pages-args page-ident] page-args)
-        (on-activate-f page-args))))
+  (utils/assert-spec :desktop/page-ident page-ident ::activate-page.page-ident)
+  (utils/assert-spec :desktop/page-args page-args ::activate-page.page-args)
+  (let [current-page (get db :desktop/current-page-ident)
+        current-args (get-in db [:desktop/pages-args current-page])]
+    (if (and (= page-ident current-page)
+             (= page-args current-args))
+      db
+      (do
+       (tap> [:dbg ::activate-page page-ident page-args])
+       (let [page (am/entity! [:page/ident page-ident])
+             on-activate-f (or (-> page :page/on-activate-f)
+                               (fn [db page-args] db))
+             loc (parse-location)]
+         (when-not (= [page-ident page-args] (parse-location))
+           (navigate! page-ident page-args))
+         (-> db
+             (assoc :desktop/current-page-ident page-ident)
+             (assoc-in [:desktop/pages-args page-ident] page-args)
+             (on-activate-f page-args)))))))
 
 
 (rf/reg-sub
@@ -75,3 +123,23 @@
  :desktop/activate-page
  (fn [db [_ page-ident page-args]]
    (activate-page db page-ident page-args)))
+
+
+
+(defn- accountant-nav-handler [path]
+  (let [[page-ident page-args] (parse-location)]
+    (rf/dispatch [:desktop/activate-page page-ident page-args])))
+
+
+(defn install-accountant! []
+  (accountant/configure-navigation!
+   {:nav-handler accountant-nav-handler
+    :path-exists? (fn [path] (str/starts-with? path "/ui/"))
+    :reload-same-path? false})
+  (accountant/dispatch-current!))
+
+
+(defonce accountant-installed?
+  (do
+   (install-accountant!)
+   true))

@@ -27,10 +27,11 @@
 
 (defn TitleSwitch [fallback-title]
   (let [title (or (<subscribe [:desktop/current-page-title-text])
-                  fallback-title)]
+                  fallback-title)
+        title (if (fn? title) (title) title)]
     (set! (. js/document -title) title)
     [:span.Title
-     (if (fn? title) (title) title)]))
+     title]))
 
 
 (defn Title [fallback-title]

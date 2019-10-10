@@ -32,7 +32,7 @@
 
 
 (defn update-asset [db asset-pool-ident asset-path update-f]
-  (tap> [:!!! ::update-asset asset-pool-ident asset-path update-f])
+  (tap> [:dbg ::update-asset asset-pool-ident asset-path update-f])
   (let [value (asset db asset-pool-ident asset-path)]
     (set-asset db asset-pool-ident asset-path (update-f value))))
   ;; (if-let [asset (asset db asset-pool-ident asset-path)]

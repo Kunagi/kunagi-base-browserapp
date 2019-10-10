@@ -92,6 +92,14 @@
 
 
 (rf/reg-sub
+ :desktop/page-args
+ (fn [_]
+   (rf/subscribe [:desktop/pages-args]))
+ (fn [pages-args [_ page-ident]]
+   (get pages-args page-ident)))
+
+
+(rf/reg-sub
  :desktop/current-page-workarea
  (fn [_]
    (rf/subscribe [:desktop/current-page-ident]))

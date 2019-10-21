@@ -1,7 +1,7 @@
 (ns kunagi-base-browserapp.modules.desktop.model
   (:require
    [kunagi-base.appmodel :as am :refer [def-module def-entity-model]]
-
+   [kunagi-base-browserapp.modules.tracking.model]
    [kunagi-base-browserapp.modules.desktop.components]))
 
 

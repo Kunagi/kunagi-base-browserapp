@@ -5,6 +5,7 @@
    [re-frame.core :as rf]
    [accountant.core :as accountant]
    [cemerick.url :refer (url url-encode)]
+
    [kunagi-base.utils :as utils]
    [kunagi-base.appmodel :as am]
    [kunagi-base-browserapp.utils :refer [parse-location-params]]))
@@ -55,17 +56,18 @@
              (= page-args current-args))
       db
       (do
-       (tap> [:dbg ::activate-page page-ident page-args])
-       (let [page (am/entity! [:page/ident page-ident])
-             on-activate-f (or (-> page :page/on-activate-f)
-                               (fn [db page-args] db))
-             loc (parse-location)]
-         (when-not (= [page-ident page-args] (parse-location))
-           (navigate! page-ident page-args))
-         (-> db
-             (assoc :desktop/current-page-ident page-ident)
-             (assoc-in [:desktop/pages-args page-ident] page-args)
-             (on-activate-f page-args)))))))
+        (tap> [:dbg ::activate-page page-ident page-args])
+        (rf/dispatch [:tracking/screen-view page-ident {:view-args page-args}])
+        (let [page (am/entity! [:page/ident page-ident])
+              on-activate-f (or (-> page :page/on-activate-f)
+                                (fn [db page-args] db))
+              loc (parse-location)]
+          (when-not (= [page-ident page-args] (parse-location))
+            (navigate! page-ident page-args))
+          (-> db
+              (assoc :desktop/current-page-ident page-ident)
+              (assoc-in [:desktop/pages-args page-ident] page-args)
+              (on-activate-f page-args)))))))
 
 
 (rf/reg-sub

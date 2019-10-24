@@ -7,6 +7,25 @@
    [kunagi-base-browserapp.modules.desktop.api :as api]))
 
 
+(defn Error [[msg info]]
+  [muic/ErrorCard
+   [:div
+    {:style {:font-weight :bold}}
+    msg]
+   [muic/Data info]])
+
+
+(defn Errors []
+  (let [errors (<subscribe [:desktop/errors])]
+    (if (empty? errors)
+      [:div.NoErrors]
+      [:> mui/Container
+       {:max-width :md}
+       [muic/Column
+        {:items errors
+         :template [Error]}]])))
+
+
 (defn WorkareaSwitch []
   [muic/ErrorBoundary
    (<subscribe [:desktop/current-page-workarea])])

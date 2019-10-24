@@ -70,6 +70,32 @@
               (on-activate-f page-args)))))))
 
 
+
+(defn install-error-handler []
+  (set! (.-onerror js/window)
+        (fn [msg url line col error]
+          (let [error-info {:msg msg
+                            :url url
+                            :line line
+                            :col col
+                            :error error}]
+            (tap> [:err ::error error-info])
+            (rf/dispatch [:desktop/error "JavaScript Error" error-info]))
+          true)))
+
+
+(rf/reg-sub
+ :desktop/errors
+ (fn [db]
+   (get db :desktop/errors)))
+
+
+(rf/reg-event-db
+ :desktop/error
+ (fn [db [_ msg info]]
+   (update db :desktop/errors conj [msg info])))
+
+
 (rf/reg-sub
  :desktop/current-page-ident
  (fn [db]
@@ -148,8 +174,3 @@
     :reload-same-path? false})
   (accountant/dispatch-current!))
 
-
-(defonce accountant-installed?
-  (do
-   (install-accountant!)
-   true))

@@ -1,6 +1,7 @@
 (ns kunagi-base-browserapp.modules.desktop.components
   (:require
    ["@material-ui/core" :as mui]
+   ["@material-ui/icons" :as icons]
 
    [mui-commons.api :refer [<subscribe]]
    [mui-commons.components :as muic]
@@ -60,3 +61,12 @@
     {:variant :h5
      :color :inherit}
     [TitleSwitch fallback-title]]])
+
+
+(defn MainNavIconButtonSwitch [index-page-element]
+  (if (= :index (<subscribe [:desktop/current-page-ident]))
+    index-page-element
+    [:> mui/IconButton
+     {:color :inherit
+      :on-click #( .back js/window.history)}
+     [:> icons/ArrowBack]]))

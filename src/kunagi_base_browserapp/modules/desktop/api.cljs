@@ -102,9 +102,7 @@
 (rf/reg-sub
  :desktop/current-page-ident
  (fn [db]
-   (or
-    (get db :desktop/current-page-ident)
-    :index)))
+   (get db :desktop/current-page-ident)))
 
 
 (rf/reg-sub
@@ -125,9 +123,10 @@
 (rf/reg-sub
  :desktop/page-args
  (fn [_]
-   (rf/subscribe [:desktop/pages-args]))
- (fn [pages-args [_ page-ident]]
-   (get pages-args page-ident)))
+   [(rf/subscribe [:desktop/pages-args])
+    (rf/subscribe [:desktop/current-page-ident])])
+ (fn [[pages-args current-page-ident] [_ page-ident]]
+   (get pages-args (or page-ident current-page-ident))))
 
 
 (rf/reg-sub

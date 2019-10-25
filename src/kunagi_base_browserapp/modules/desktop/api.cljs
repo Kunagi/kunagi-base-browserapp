@@ -8,7 +8,8 @@
 
    [kunagi-base.utils :as utils]
    [kunagi-base.appmodel :as am]
-   [kunagi-base-browserapp.utils :refer [parse-location-params]]))
+   [kunagi-base-browserapp.utils :refer [parse-location-params
+                                         scroll-to-top!]]))
 
 
 (s/def :desktop/page-ident simple-keyword?)
@@ -46,6 +47,7 @@
            page-args)))))
 
 
+
 (defn- activate-page
   [db page-ident page-args]
   (utils/assert-spec :desktop/page-ident page-ident ::activate-page.page-ident)
@@ -58,6 +60,7 @@
       (do
         (tap> [:dbg ::activate-page page-ident page-args])
         (rf/dispatch [:tracking/screen-view page-ident {:view-args page-args}])
+        (scroll-to-top!)
         (let [page (am/entity! [:page/ident page-ident])
               on-activate-f (or (-> page :page/on-activate-f)
                                 (fn [db page-args] db))

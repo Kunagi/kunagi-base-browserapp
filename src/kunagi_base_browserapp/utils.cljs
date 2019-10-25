@@ -3,6 +3,10 @@
    [clojure.string :refer [split]]))
 
 
+(defn scroll-to-top! []
+  (js/window.scrollTo 0 0))
+
+
 (defn parse-location-params
   "Parse URL parameters into a hashmap"
   []

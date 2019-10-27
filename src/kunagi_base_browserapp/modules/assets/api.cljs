@@ -12,7 +12,7 @@
 ;;;
 
 (defn- on-asset-updated [asset-pool asset-path asset]
-  (localstorage/on-asset-updated asset-pool asset-path asset))
+  (localstorage/store-asset asset-pool asset-path asset))
 
 
 ;;; api

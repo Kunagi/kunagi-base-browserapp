@@ -136,7 +136,7 @@
  (fn [page-ident _]
    (if-let [page (page page-ident)]
      (-> page :page/workarea)
-     [:div "Page not found " (pr-str page-ident)])))
+     [:div])))
 
 
 (rf/reg-sub

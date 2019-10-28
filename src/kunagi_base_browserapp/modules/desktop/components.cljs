@@ -3,17 +3,21 @@
    ["@material-ui/core" :as mui]
    ["@material-ui/icons" :as icons]
 
-   [mui-commons.api :refer [<subscribe]]
+   [mui-commons.api :refer [<subscribe dispatch!]]
    [mui-commons.components :as muic]
    [kunagi-base-browserapp.modules.desktop.api :as api]))
 
 
-(defn Error [[msg info]]
+(defn Error [[id [msg info]]]
   [muic/ErrorCard
    [:div
     {:style {:font-weight :bold}}
     msg]
-   [muic/Data info]])
+   [muic/Data info]
+   [:br]
+   [:> mui/Button
+    {:on-click #(dispatch! [:desktop/dismiss-error id])}
+    "Dismiss"]])
 
 
 (defn Errors []
@@ -24,7 +28,8 @@
        {:max-width :md}
        [muic/Column
         {:items errors
-         :template [Error]}]])))
+         :template [Error]
+         :style {:margin-bottom "1rem"}}]])))
 
 
 (defn WorkareaSwitch []

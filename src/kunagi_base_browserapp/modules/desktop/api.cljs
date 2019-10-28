@@ -95,8 +95,15 @@
 
 (rf/reg-event-db
  :desktop/error
- (fn [db [_ msg info]]
-   (update db :desktop/errors conj [msg info])))
+ (fn [db [_ msg data]]
+   (update db :desktop/errors assoc (random-uuid) [msg data])))
+
+
+(rf/reg-event-db
+ :desktop/dismiss-error
+ (fn [db [_ id]]
+   (update db :desktop/errors dissoc id)))
+
 
 
 (rf/reg-sub

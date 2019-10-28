@@ -11,14 +11,14 @@
   "Returns value of `key' from browser's localStorage."
   [key]
   (if (android?)
-    (-> js/AndroidStorage (.getItem key))
+    (-> js/AndroidStorage (.readFile key))
     (.getItem (.-localStorage js/window) key)))
 
 (defn- set-item!
   "Set `key' in browser's localStorage to `val`."
   [key val]
   (if (android?)
-    (-> js/AndroidStorage (.setItem key val))
+    (-> js/AndroidStorage (.writeFile key val))
     (.setItem (.-localStorage js/window) key val)))
 
 (defn- remove-item!
@@ -31,11 +31,11 @@
 
 (defn- storage-key [asset-pool asset-path]
   (let [asset-pool-ident (-> asset-pool :asset-pool/ident)]
-    (str "assets/asset "
+    (str "assets/"
          (namespace asset-pool-ident)
-         " "
+         "/"
          (name asset-pool-ident)
-         " "
+         "/"
          (-> asset-path))))
 
 

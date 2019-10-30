@@ -4,6 +4,7 @@
    [re-frame.core :as rf]
    [ajax.core :as ajax]
 
+   [kunagi-base.utils :as utils]
    [kunagi-base.auth.api :as auth]
    [kunagi-base.context :as context]
    [kunagi-base.appmodel :as am]
@@ -44,6 +45,18 @@
   ;;                    :asset-path asset-path}))))
 
 
+(defn- handle-asset-received [db asset-pool-ident asset-path data]
+  (let [asset-pool (am/entity! [:asset-pool/ident asset-pool-ident])
+        handlers (-> asset-pool :asset-pool/asset-received-handlers)]
+    (reduce
+     (fn [db handler]
+       (utils/assert-spec
+        :app/db
+        (handler db asset-pool-ident asset-path data)))
+     db
+     handlers)))
+
+
 ;;; re-frame
 
 (rf/reg-sub
@@ -58,7 +71,9 @@
                     asset-path
                     data]}]]
    (tap> [:dbg ::asset-received asset-pool-ident asset-path])
-   (set-asset db asset-pool-ident asset-path data)))
+   (-> db
+       (set-asset asset-pool-ident asset-path data)
+       (handle-asset-received asset-pool-ident asset-path data))))
 
 
 (rf/reg-event-db

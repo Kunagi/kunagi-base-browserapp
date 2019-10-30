@@ -19,7 +19,8 @@
    :asset-pool/request-on-startup {:spec (s/coll-of string?)}
    :asset-pool/load-on-startup {:spec (s/coll-of string?)}
    :asset-pool/url-path {:spec string?}
-   :asset-pool/localstorage {:spec boolean?}})
+   :asset-pool/localstorage {:spec boolean?}
+   :asset-pool/asset-received-handlers {:spec (s/coll-of fn?)}})
 
 
 (def-init-function

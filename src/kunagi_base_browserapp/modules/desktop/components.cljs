@@ -16,7 +16,8 @@
    [muic/Data info]
    [:br]
    [:> mui/Button
-    {:on-click #(dispatch! [:desktop/dismiss-error id])}
+    {:on-click #(dispatch! [:desktop/dismiss-error id])
+     :color :inherit}
     "Dismiss"]])
 
 

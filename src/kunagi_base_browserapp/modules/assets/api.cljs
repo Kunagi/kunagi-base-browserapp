@@ -162,14 +162,29 @@
   app-db)
 
 
+(defn- load-asset-from-pool [db asset-pool asset-path]
+  (set-asset db
+             (-> asset-pool :asset-pool/ident)
+             asset-path
+             (localstorage/load-asset asset-pool asset-path)))
+
+
+(defn load-asset [db asset-pool-ident asset-path]
+  (let [asset-pool (am/entity! [:asset-pool/ident asset-pool-ident])]
+    (load-asset-from-pool db asset-pool asset-path)))
+
+
+(defn load-asset-if-missing [db asset-pool-ident asset-path]
+  (if (asset db asset-pool-ident asset-path)
+    db
+    (load-asset db asset-pool-ident asset-path)))
+
+
 (defn- load-startup-assets-from-pool
   [db asset-pool]
   (reduce
    (fn [db asset-path]
-     (set-asset db
-                (-> asset-pool :asset-pool/ident)
-                asset-path
-                (localstorage/load-asset asset-pool asset-path)))
+     (load-asset-from-pool db asset-pool asset-path))
    db
    (-> asset-pool :asset-pool/load-on-startup)))
 

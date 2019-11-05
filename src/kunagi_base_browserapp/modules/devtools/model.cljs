@@ -1,4 +1,4 @@
-(ns kunagi-base-browserapp.devtools.model
+(ns kunagi-base-browserapp.modules.devtools.model
   (:require
    [kunagi-base.appmodel :refer [def-module]]
    [kunagi-base.modules.startup.model :refer [def-init-function]]

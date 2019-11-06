@@ -3,6 +3,6 @@
    [re-frame.core :as rf]))
 
 (rf/reg-sub
- :browserapp/config
+ :appconfig/config
  (fn [db _]
-   (get db :browserapp/config)))
+   (get db :appconfig/config)))

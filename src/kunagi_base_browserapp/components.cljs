@@ -15,7 +15,7 @@
 
 
 (defn DevModeBoundary [& dev-only-components]
-  (let [config (<subscribe [:browserapp/config])
+  (let [config (<subscribe [:appconfig/config])
         dev-mode? (-> config :dev-mode?)]
     (into
      [:div.DevModeBoundary]

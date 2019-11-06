@@ -146,7 +146,9 @@
   (let [req-perms (-> asset-pool :asset-pool/req-perms)]
     (if (auth/context-has-permissions? context req-perms)
       (doseq [asset-path (-> asset-pool :asset-pool/request-on-startup)]
-        (request-asset-from-pool! asset-pool asset-path)))))
+        (request-asset-from-pool! asset-pool asset-path))
+      (tap> [:wrn ::request-startup-assets-from-pool_no-permission {:req-perms req-perms
+                                                                    :context context}]))))
 
 
 (defn- q-asset-pools-with-request-on-startup []
@@ -156,6 +158,7 @@
 
 
 (defn request-startup-assets [app-db]
+  ;; (tap> [:!!! ::request-startup-assets])
   (doseq [[asset-pool-id] (am/q! (q-asset-pools-with-request-on-startup))]
     (request-startup-assets-from-pool (am/entity! asset-pool-id)
                                       (context/from-rf-db app-db)))
@@ -163,6 +166,7 @@
 
 
 (defn- load-asset-from-pool [db asset-pool asset-path]
+  (tap> [:dbg ::load-asset-from-pool (-> asset-pool :asset-pool/ident) asset-path])
   (set-asset db
              (-> asset-pool :asset-pool/ident)
              asset-path

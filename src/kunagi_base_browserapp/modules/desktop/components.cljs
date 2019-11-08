@@ -5,7 +5,7 @@
 
    [mui-commons.api :refer [<subscribe dispatch!]]
    [mui-commons.components :as muic]
-   [kunagi-base-browserapp.modules.desktop.api :as api]))
+   [mui-commons.theme :as theme]))
 
 
 (defn Error [[id [msg info]]]
@@ -76,3 +76,25 @@
      {:color :inherit
       :on-click #( .back js/window.history)}
      [:> icons/ArrowBack]]))
+
+
+(defn Desktop [{:keys [app-bar
+                        container-max-width
+                        footer
+                        workarea-guard]}]
+  [:div
+   {:style {:font-family "\"Roboto\", \"Helvetica\", \"Arial\", sans-serif"
+            :color "#333"}}
+   [:> mui/CssBaseline]
+   [:> mui/MuiThemeProvider
+    {:theme (theme/theme)}
+    app-bar
+    [:div
+     {:style {:margin-top "84px"}}
+     [Errors]
+     [:> mui/Container
+      {:max-width container-max-width}
+      [muic/ErrorBoundary
+       (or workarea-guard
+           [WorkareaSwitch])]]]]
+   footer])

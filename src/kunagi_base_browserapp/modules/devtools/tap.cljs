@@ -21,7 +21,7 @@
 
 (defn Records []
 
-  [muic/Column
+  [muic/Stack
    {:items (take 10 @!records)
     :template [Record]}])
 

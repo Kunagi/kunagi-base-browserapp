@@ -1,5 +1,6 @@
 (ns kunagi-base-browserapp.modules.desktop.components
   (:require
+   [reagent.core :as r]
    ["@material-ui/core" :as mui]
    ["@material-ui/icons" :as icons]
 
@@ -27,7 +28,7 @@
       [:div.NoErrors]
       [:> mui/Container
        {:max-width :md}
-       [muic/Column
+       [muic/Stack
         {:items errors
          :template [Error]
          :style {:margin-bottom "1rem"}}]])))
@@ -78,6 +79,14 @@
      [:> icons/ArrowBack]]))
 
 
+(defn Snackbars []
+  [:div.Snackbar
+   (when-let [snackbar (<subscribe [:desktop/snackbar])]
+     [:> mui/Snackbar
+      {:open (-> snackbar :open?)
+       :message (-> snackbar :message)}])])
+
+
 (defn Desktop [{:keys [app-bar
                         container-max-width
                         footer
@@ -92,9 +101,12 @@
     [:div
      {:style {:margin-top "84px"}}
      [Errors]
+     [Snackbars]
      [:> mui/Container
       {:max-width container-max-width}
       [muic/ErrorBoundary
        (or workarea-guard
            [WorkareaSwitch])]]]]
    footer])
+
+

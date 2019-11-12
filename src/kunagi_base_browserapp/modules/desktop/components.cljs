@@ -63,9 +63,8 @@
 
 (defn Title [fallback-title]
   [:div
-   {:style {:margin-left "1rem"}}
    [:> mui/Typography
-    {:variant :h5
+    {:variant :h6
      :color :inherit}
     [TitleSwitch fallback-title]]])
 

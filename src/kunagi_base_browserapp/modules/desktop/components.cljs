@@ -45,11 +45,32 @@
        [:div])])
 
 
+(defn BackButton [on-click]
+  [:> mui/IconButton
+   {:color :inherit
+    :on-click (or on-click
+                  #( .back js/window.history))}
+   [:> icons/ArrowBack]])
+
+
+(defn BackButtonSwitch [fallback]
+  [muic/ErrorBoundary
+   (or (<subscribe [:desktop/current-page-back-button])
+       fallback
+       [BackButton])])
+
+
 (defn AppBarToolbar []
   [:div.Toolbar
    {:style {:display :flex}}
    [muic/ErrorBoundary
     [ToolbarSwitch]]])
+
+
+(defn MainNavIconButtonSwitch [index-page-element]
+  (if (= :index (<subscribe [:desktop/current-page-ident]))
+    index-page-element
+    [BackButtonSwitch]))
 
 
 (defn TitleSwitch [fallback-title]
@@ -67,15 +88,6 @@
     {:variant :h6
      :color :inherit}
     [TitleSwitch fallback-title]]])
-
-
-(defn MainNavIconButtonSwitch [index-page-element]
-  (if (= :index (<subscribe [:desktop/current-page-ident]))
-    index-page-element
-    [:> mui/IconButton
-     {:color :inherit
-      :on-click #( .back js/window.history)}
-     [:> icons/ArrowBack]]))
 
 
 (defn Snackbars []

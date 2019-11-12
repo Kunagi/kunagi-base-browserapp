@@ -216,6 +216,15 @@
      (-> page :page/title-text))))
 
 
+(rf/reg-sub
+ :desktop/current-page-back-button
+ (fn [_]
+   (rf/subscribe [:desktop/current-page-ident]))
+ (fn [page-ident _]
+   (if-let [page (page page-ident)]
+     (-> page :page/back-button))))
+
+
 (rf/reg-event-db
  :desktop/activate-page
  (fn [db [_ page-ident page-args]]

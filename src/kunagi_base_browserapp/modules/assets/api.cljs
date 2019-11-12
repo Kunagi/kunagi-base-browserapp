@@ -45,14 +45,13 @@
   ;;                    :asset-path asset-path}))))
 
 
-(defn- handle-asset-received [db asset-pool-ident asset-path data]
-  (let [asset-pool (am/entity! [:asset-pool/ident asset-pool-ident])
-        handlers (-> asset-pool :asset-pool/asset-received-handlers)]
+(defn- handle-asset-received [db asset-pool asset-path data]
+  (let [handlers (-> asset-pool :asset-pool/asset-received-handlers)]
     (reduce
      (fn [db handler]
        (utils/assert-spec
         :app/db
-        (handler db asset-pool-ident asset-path data)))
+        (handler db asset-pool asset-path data)))
      db
      handlers)))
 
@@ -71,9 +70,14 @@
                     asset-path
                     data]}]]
    (tap> [:dbg ::asset-received asset-pool-ident asset-path])
-   (-> db
-       (set-asset asset-pool-ident asset-path data)
-       (handle-asset-received asset-pool-ident asset-path data))))
+   (let [asset-pool (am/entity! [:asset-pool/ident asset-pool-ident])
+         transformer (-> asset-pool :asset-pool/asset-received-transformer)
+         data (if-not transformer
+                data
+                (transformer asset-pool asset-path data))]
+       (-> db
+           (set-asset asset-pool-ident asset-path data)
+           (handle-asset-received asset-pool asset-path data)))))
 
 
 (rf/reg-event-db

@@ -1,9 +1,11 @@
 (ns kunagi-base-browserapp.modules.tracking.api
   (:require
-   [reagent.core :as r]))
+   [reagent.core :as r]
+   [kunagi-base-browserapp.google-analytics :as ga]))
 
-
-(defonce !track (r/atom (fn [& args] (js/console.log "TRACK" args))))
+(defonce !track (r/atom (fn [event-name event-params]
+                          (js/console.log "TRACK" event-name event-params)
+                          (apply ga/track event-name event-params))))
 
 
 (defn track! [event-name event-params]

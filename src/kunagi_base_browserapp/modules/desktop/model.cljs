@@ -20,12 +20,12 @@
                       db)})
 
 
-(def-init-function
-  {:init-function/id ::install-error-handler
-   :init-function/module [:module/ident :desktop]
-   :init-function/f (fn [db]
-                      (impl/install-error-handler)
-                      db)})
+;; (def-init-function
+;;   {:init-function/id ::install-error-handler
+;;    :init-function/module [:module/ident :desktop]
+;;    :init-function/f (fn [db]
+;;                       (impl/install-error-handler)
+;;                       db)})
 
 
 (def-entity-model

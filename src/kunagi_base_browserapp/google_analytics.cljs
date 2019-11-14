@@ -1,7 +1,26 @@
 (ns kunagi-base-browserapp.google-analytics)
 
-(defonce !activated (atom false))
-(defonce !script-installed (atom false))
+(defonce !activated (atom nil))
+
+
+
+(defn update-page-path []
+  (when-let [tracking-id (->  @!activated :tracking-id)]
+    (js/gtag "config"
+             tracking-id
+             (clj->js {"page_path" (-> js/window .-location .-pathname)}))))
+
+
+(defn track [event-name event-params]
+  (when-let [tracking-id (->  @!activated :tracking-id)]
+    (when (= "screen_view" event-name)
+      (update-page-path))
+    (js/gtag "event" event-name (clj->js event-params))))
+
+
+;;; installation
+
+(defonce !installed (atom false))
 
 
 (defn- install-script-tag [src text]
@@ -13,8 +32,8 @@
     (.appendChild (.-head js/document) script-tag)))
 
 
-(defn install-script [config]
-  (when-not @!script-installed
+(defn install [config]
+  (when-not @!installed
     (tap> [:dbg ::install-script config])
     (install-script-tag
      (str "https://www.googletagmanager.com/gtag/js?id=" (-> config :tracking-id))
@@ -33,17 +52,27 @@
 
   gtag('config', '" (-> config :tracking-id) "', " gt-config-s ");
 ")))
-    (reset! !script-installed true)))
+    ;; (set! (.-onhashchange js/window)
+    ;;       #(update-page-path (-> js/window .-location .-pathname)))
+    (reset! !installed true)))
 
+
+;;; activate
 
 (defn activate [config]
   (when-not @!activated
     (tap> [:inf ::activate])
-    (install-script config)
-    (reset! !activated true)))
+    (install config)
+    (reset! !activated config)))
+
+
+;;; deactivate
 
 
 (defn deactivate []
   (when @!activated
     (tap> [:inf ::deactivate])
-    (reset! !activated false)))
+    (install-script-tag nil (str "window['ga-disable-"
+                                 (-> @!activated :tracking-id)
+                                 "'] = true;"))
+    (reset! !activated nil)))

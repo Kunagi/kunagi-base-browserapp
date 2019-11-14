@@ -59,7 +59,7 @@
       db
       (do
         (tap> [:dbg ::activate-page page-ident page-args])
-        (rf/dispatch [:tracking/screen-view page-ident {:view-args page-args}])
+        (rf/dispatch [:tracking/screen-view page-ident {"page_args" page-args}])
         (scroll-to-top!)
         (let [page (am/entity! [:page/ident page-ident])
               on-activate-f (or (-> page :page/on-activate-f)

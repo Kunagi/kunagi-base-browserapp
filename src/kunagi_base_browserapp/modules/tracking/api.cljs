@@ -8,8 +8,11 @@
                           (apply ga/track event-name event-params))))
 
 
-(defn track! [event-name event-params]
-  (@!track event-name event-params))
+(defn track!
+  ([event-name]
+   (track! event-name nil))
+  ([event-name event-params]
+   (@!track event-name event-params)))
 
 
 (defn track-screen-view! [screen-name params]

@@ -12,7 +12,7 @@
 
 
 (defn track [event-name event-params]
-  (when-let [tracking-id (->  @!activated :tracking-id)]
+  (when @!activated
     (when (= "screen_view" event-name)
       (update-page-path))
     (js/gtag "event" event-name (clj->js event-params))))
@@ -38,11 +38,12 @@
     (install-script-tag
      (str "https://www.googletagmanager.com/gtag/js?id=" (-> config :tracking-id))
      nil)
-    (let [gt-config {"send_page_view" false
-                     "anonymize_ip" (get config :anonymize-ip true)
-                     "app_name" (get config :app-name "no-app-name")
-                     "currency" (get config :currency "EUR")}
-          gt-config-s (.stringify js/JSON (clj->js gt-config))]
+    (let [gt-config {;; "send_page_view" false
+                     "anonymize_ip" (get config :anonymize-ip true)}
+          gt-config-s (.stringify js/JSON (clj->js gt-config))
+          gt-set {"app_name" (get config :app-name "no-app-name")
+                  "currency" (get config :currency "EUR")}
+          gt-set-s (.stringify js/JSON (clj->js gt-set))]
       (install-script-tag
        nil
        (str "
@@ -51,6 +52,7 @@
   gtag('js', new Date());
 
   gtag('config', '" (-> config :tracking-id) "', " gt-config-s ");
+  gtag('set', " gt-set-s ")
 ")))
     ;; (set! (.-onhashchange js/window)
     ;;       #(update-page-path (-> js/window .-location .-pathname)))

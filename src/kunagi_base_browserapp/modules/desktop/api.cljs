@@ -8,6 +8,7 @@
 
    [kunagi-base.utils :as utils]
    [kunagi-base.appmodel :as am]
+   [kunagi-base-browserapp.modules.tracking.api :as tracking]
    [kunagi-base-browserapp.utils :refer [parse-location-params
                                          scroll-to-top!]]))
 
@@ -59,7 +60,9 @@
       db
       (do
         (tap> [:dbg ::activate-page page-ident page-args])
-        (rf/dispatch [:tracking/screen-view page-ident {"page_args" page-args}])
+        (tracking/track-screen-view! page-ident (if (empty? page-args)
+                                                  nil
+                                                  {"page_args" page-args}))
         (scroll-to-top!)
         (let [page (am/entity! [:page/ident page-ident])
               on-activate-f (or (-> page :page/on-activate-f)

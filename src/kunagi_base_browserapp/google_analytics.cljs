@@ -12,10 +12,11 @@
 
 
 (defn track [event-name event-params]
-  (when @!activated
+  (when-let [config @!activated]
     (when (= "screen_view" event-name)
       (update-page-path))
-    (js/gtag "event" event-name (clj->js event-params))))
+    (js/gtag "event" event-name (clj->js (assoc event-params
+                                                "app_name" (-> config :app-name))))))
 
 
 ;;; installation
@@ -48,7 +49,7 @@
        nil
        (str "
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag(){console.log('gtag()', arguments); dataLayer.push(arguments);}
   gtag('js', new Date());
 
   gtag('config', '" (-> config :tracking-id) "', " gt-config-s ");

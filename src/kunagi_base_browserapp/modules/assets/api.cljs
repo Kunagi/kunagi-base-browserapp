@@ -58,6 +58,13 @@
 
 ;;; re-frame
 
+
+(rf/reg-sub
+ :assets/asset-pool
+ (fn [db [_ asset-pool-ident]]
+   (get-in db [:assets/asset-pools asset-pool-ident])))
+
+
 (rf/reg-sub
  :assets/asset
  (fn [db [_ asset-pool-ident asset-path]]

@@ -73,21 +73,17 @@
     [BackButtonSwitch]))
 
 
-(defn TitleSwitch [fallback-title]
-  (let [title (or (<subscribe [:desktop/current-page-title-text])
-                  fallback-title)
-        title (if (fn? title) (title) title)]
-    (set! (. js/document -title) title)
-    [:span.Title
-     title]))
-
-
-(defn Title [fallback-title]
-  [:div
-   [:> mui/Typography
-    {:variant :h6
-     :color :inherit}
-    [TitleSwitch fallback-title]]])
+(defn DocumentTitleSwitch [suffix]
+  (let [title (<subscribe [:desktop/current-page-title-text])
+        title (if (fn? title) (title) title)
+        title (if suffix
+                (if title
+                  (str title " - " suffix)
+                  suffix)
+                title)]
+    (when title
+      (set! (. js/document -title) title))
+    [:span.DocumentTitleSwitch]))
 
 
 (defn Snackbars []
@@ -98,26 +94,29 @@
        :message (-> snackbar :message)}])])
 
 
-(defn Desktop [{:keys [app-bar
-                        container-max-width
-                        footer
-                        workarea-guard]}]
-  [:div
-   {:style {:font-family "\"Roboto\", \"Helvetica\", \"Arial\", sans-serif"
-            :color "#333"}}
+(defn Desktop [{:keys [css
+                       app-bar
+                       container-max-width
+                       footer
+                       workarea-guard
+                       document-title-suffix]}]
+  [:div.Desktop
+   {:style {:font-family "\"Roboto\", \"Helvetica\", \"Arial\", sans-serif"}}
+   [DocumentTitleSwitch document-title-suffix]
    [:> mui/CssBaseline]
    [:> mui/MuiThemeProvider
     {:theme (theme/theme)}
-    app-bar
-    [:div
-     {:style {:margin-top "84px"}}
-     [Errors]
-     [Snackbars]
-     [:> mui/Container
-      {:max-width container-max-width}
-      [muic/ErrorBoundary
-       (or workarea-guard
-           [WorkareaSwitch])]]]]
-   footer])
-
-
+    (muic/with-css
+      css
+      [:div.DesktopContent
+       app-bar
+       [:div
+        {:style {:margin-top "84px"}}
+        [Errors]
+        [Snackbars]
+        [:> mui/Container
+         {:max-width container-max-width}
+         [muic/ErrorBoundary
+          (or workarea-guard
+              [WorkareaSwitch])]]]
+       footer])]])

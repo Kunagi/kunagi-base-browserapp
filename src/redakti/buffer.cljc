@@ -16,7 +16,7 @@
     (if (empty? path)
       node
       (let [idx (first path)
-            child (-> node :navigator.node/nodes (nth idx))]
+            child (-> node :redakti.node/nodes (nth idx))]
         (when child
           (node-by-path child (rest path)))))))
 
@@ -28,7 +28,7 @@
 
 
 (defn path-first-child [path tree]
-  (if (empty? (-> (node-by-path tree path) :navigator.node/nodes))
+  (if (empty? (-> (node-by-path tree path) :redakti.node/nodes))
     nil
     (conj path 0)))
 
@@ -47,7 +47,7 @@
     nil
     (let [idx (last path)
           parent-path (path-without-last path)
-          limit (-> (node-by-path tree parent-path) :navigator.node/nodes count dec)]
+          limit (-> (node-by-path tree parent-path) :redakti.node/nodes count dec)]
       (if (>= idx limit)
         (path-parent path tree)
         (assoc path (-> path count dec) (inc idx))))))
@@ -73,13 +73,13 @@
 ;;; creating / updating
 
 (defn leaf [& component]
-  {:navigator.node/type :leaf
-   :navigator.node/component component})
+  {:redakti.node/type :leaf
+   :redakti.node/component component})
 
 
 (defn column [& nodes]
-  {:navigator.node/type :column
-   :navigator.node/nodes nodes})
+  {:redakti.node/type :column
+   :redakti.node/nodes nodes})
 
 
 (defn dummy-tree []

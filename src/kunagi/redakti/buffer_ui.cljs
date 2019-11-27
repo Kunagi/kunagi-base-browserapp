@@ -1,4 +1,4 @@
-(ns kunagi.redakti.navigator
+(ns kunagi.redakti.buffer-ui
   (:require
    ["@material-ui/core" :as mui]
    [mui-commons.components :as muic]
@@ -18,10 +18,10 @@
             :outline (when (= path (-> buffer :cursor)) cursor-outline)}}
    (when-let [text (-> n :redakti.node/text)]
      [:div.Leaf-Text
-      text])
-   [:div.Debug
-    [muic/Data path]
-    [muic/Data n]]])
+      text])])
+   ;; [:div.Debug
+   ;;  [muic/Data path]
+   ;;  [muic/Data n]]])
 
 
 (defn Column [buffer n path]
@@ -29,7 +29,10 @@
    {:style {:border "1px solid blue"
             :padding "1em"
             :outline (when (= path (-> buffer :cursor)) cursor-outline)}}
-   [muic/Data path]
+   ;; [muic/Data path]
+   (when-let [text (-> n :redakti.node/text)]
+     [:div.Leaf-Text
+      text])
    (into
     [muic/Stack]
     (map-indexed
@@ -51,5 +54,5 @@
       [Leaf buffer n path])))
 
 
-(defn Navigator [buffer]
+(defn Buffer [buffer]
    (node buffer []))

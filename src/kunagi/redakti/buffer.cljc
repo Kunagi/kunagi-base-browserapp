@@ -95,11 +95,46 @@
 
 (defn new-buffer [root-node]
   {:cursor []
+   :actions {}
    :tree root-node})
 
 
-;;; keys
+(defn reg-action [buffer action]
+  (assoc-in buffer [:actions (-> action :ident)] action))
 
+
+;;; actions
+
+(defn !cursor [buffer cursor]
+  (if-not cursor
+    buffer
+    (if (= (-> buffer :cursor) cursor)
+      buffer
+      (assoc buffer :cursor cursor))))
+
+(defn !cursor-step-in [{:keys [tree cursor] :as buffer}]
+  (!cursor buffer (path-first-child cursor tree)))
+
+(defn !cursor-step-out [{:keys [tree cursor] :as buffer}]
+  (!cursor buffer (path-parent cursor tree)))
+
+(defn !cursor-next [{:keys [tree cursor] :as buffer}]
+  (!cursor buffer (path-next cursor tree)))
+
+(defn !cursor-prev [{:keys [tree cursor] :as buffer}]
+  (!cursor buffer (path-prev cursor tree)))
+
+(defn !cursor-right [{:keys [tree cursor] :as buffer}]
+  (!cursor buffer (path-right cursor tree)))
+
+(defn !cursor-left [{:keys [tree cursor] :as buffer}]
+  (!cursor buffer (path-left cursor tree)))
+
+(defn !cursor-up [{:keys [tree cursor] :as buffer}]
+  (!cursor buffer (path-up cursor tree)))
+
+(defn !cursor-down [{:keys [tree cursor] :as buffer}]
+  (!cursor buffer (path-down cursor tree)))
 
 (defn cursor-after-key [{:keys [tree cursor] :as buffer} key]
   (js/console.log key buffer)

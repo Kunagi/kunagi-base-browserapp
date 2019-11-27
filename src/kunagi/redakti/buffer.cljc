@@ -1,4 +1,4 @@
-(ns redakti.buffer)
+(ns kunagi.redakti.buffer)
 
 
 (defn path-without-last
@@ -93,9 +93,9 @@
    (leaf)))
 
 
-(defn new-buffer []
+(defn new-buffer [root-node]
   {:cursor []
-   :tree (dummy-tree)})
+   :tree root-node})
 
 
 ;;; keys

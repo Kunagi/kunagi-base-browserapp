@@ -12,6 +12,14 @@
   (s/valid? ::redakti redakti))
 
 
+(defn node [redakti]
+  (buffer/node-under-cursor (-> redakti :buffer)))
+
+
+(defn node-payload [redakti]
+  (-> redakti node :redakti.node/payload))
+
+
 (defn reg-action [redakti action]
   (assoc-in redakti [:actions (-> action :ident)] action))
 
@@ -24,55 +32,83 @@
   (assoc redakti :message [message-type message]))
 
 
+(defn !goto-sub-buffer [redakti buffer]
+  (let [buffer (assoc buffer :parent-puffer (-> redakti :buffer))]
+    (-> redakti
+        (dissoc :message)
+        (assoc :buffer buffer))))
+
+(defn !cursor
+  ([redakti f-new-cursor]
+   (!cursor redakti f-new-cursor nil))
+  ([redakti f-new-cursor alt-action]
+   (let [cursor (-> redakti :buffer :cursor)
+         tree (-> redakti :buffer :tree)
+         cursor (f-new-cursor cursor tree)]
+     (tap> [:!!! ::!cursor cursor])
+     (if-not cursor
+       (or alt-action redakti)
+       (if (= (-> redakti :buffer :cursor) cursor)
+         redakti
+         (assoc-in redakti [:buffer :cursor] cursor))))))
 
 
 (defn- reg-action--cursor-step-in [redakti]
   (reg-action
    redakti
    {:ident :cursor-step-in
-    :f (fn [redakti] (update redakti :buffer buffer/!cursor-step-in))}))
+    :f     #(!cursor % buffer/path-first-child)}))
 
 (defn- reg-action--cursor-step-out [redakti]
   (reg-action
    redakti
    {:ident :cursor-step-out
-    :f     (fn [redakti] (update redakti :buffer buffer/!cursor-step-out))}))
+    :f     #(!cursor % buffer/path-parent :goto-parent-buffer)}))
 
 (defn- reg-action--cursor-next [redakti]
   (reg-action
    redakti
    {:ident :cursor-next
-    :f     (fn [redakti] (update redakti :buffer buffer/!cursor-next))}))
+    :f     #(!cursor % buffer/path-next)}))
 
 (defn- reg-action--cursor-prev [redakti]
   (reg-action
    redakti
    {:ident :cursor-prev
-    :f     (fn [redakti] (update redakti :buffer buffer/!cursor-prev))}))
+    :f     #(!cursor % buffer/path-prev)}))
 
 (defn- reg-action--cursor-up [redakti]
   (reg-action
    redakti
    {:ident :cursor-up
-    :f     (fn [redakti] (update redakti :buffer buffer/!cursor-up))}))
+    :f     #(!cursor % buffer/path-up)}))
 
 (defn- reg-action--cursor-down [redakti]
   (reg-action
    redakti
    {:ident :cursor-down
-    :f     (fn [redakti] (update redakti :buffer buffer/!cursor-down))}))
+    :f     #(!cursor % buffer/path-down)}))
 
 (defn- reg-action--cursor-left [redakti]
   (reg-action
    redakti
    {:ident :cursor-left
-    :f     (fn [redakti] (update redakti :buffer buffer/!cursor-left))}))
+    :f     #(!cursor % buffer/path-left :goto-parent-buffer)}))
 
 (defn- reg-action--cursor-right [redakti]
   (reg-action
    redakti
    {:ident :cursor-right
-    :f     (fn [redakti] (update redakti :buffer buffer/!cursor-right))}))
+    :f     #(!cursor % buffer/path-right :enter)}))
+
+(defn- reg-action--goto-parent-buffer [redakti]
+  (reg-action
+   redakti
+   {:ident :goto-parent-buffer
+    :f     (fn [redakti]
+             (if-let [parent-buffer (-> redakti :buffer :parent-puffer)]
+               (assoc redakti :buffer parent-buffer)
+               (!message redakti :inf "Already in root buffer")))}))
 
 
 (defn new-redakti [buffer]
@@ -85,25 +121,30 @@
       reg-action--cursor-prev
       reg-action--cursor-next
       reg-action--cursor-up
-      reg-action--cursor-down
-      reg-action--cursor-left
-      reg-action--cursor-right
-      (map-key "h" :cursor-left)
-      (map-key "j" :cursor-down)
       (map-key "k" :cursor-up)
+      reg-action--cursor-down
+      (map-key "j" :cursor-down)
+      reg-action--cursor-left
+      (map-key "h" :cursor-left)
+      reg-action--cursor-right
       (map-key "l" :cursor-right)
+      reg-action--goto-parent-buffer
+      (map-key "b" :goto-parent-buffer)
       (map-key "Enter" :enter)
       (map-key " " :menu)))
 
 
 (defn !action [redakti action-ident]
   (let [redakti (dissoc redakti :message)]
-    (if-let [action (-> redakti :actions (get action-ident))]
+    (if-let [action (or (-> redakti :actions (get action-ident))
+                        (-> redakti :buffer :actions (get action-ident)))]
       (if-let [f (-> action :f)]
-        (let [updated-redakti (f redakti)]
-          (if (redakti? updated-redakti)
-            updated-redakti
-            (!message redakti :err (str "Action " action-ident " corrupted state!"))))
+        (let [ret (f redakti)]
+          (cond
+            (nil? ret) redakti
+            (keyword? ret) (!action redakti ret)
+            (redakti? ret) ret
+            :else (!message redakti :err (str "Action " action-ident " corrupted state!"))))
         (!message redakti :err (str "Missing :f in action " action-ident)))
       (!message redakti :inf (str "No action " action-ident)))))
 

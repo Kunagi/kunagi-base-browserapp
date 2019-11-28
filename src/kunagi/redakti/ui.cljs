@@ -30,7 +30,7 @@
 
 (defn Redakti [redakti]
   [muic/Stack
-   [FeedbackBar redakti ]
+   [FeedbackBar redakti]
    [buffer-ui/Buffer (-> redakti :buffer)]
    [:div.DEBUG
     [muic/Data (-> @!redakti :buffer :cursor)]
@@ -38,11 +38,12 @@
 
 
 (defn Redakti! []
-  [:div.Redakti
-   {:tabIndex    1
-    :on-key-press #(do
+  [muic/Focusable
+   {:on-key-press #(do
                      ;;(js/console.log (-> % .-key) "|" (-> %)))}
                      (swap! !redakti redakti/!action-for-key (-> % .-key))
                      (-> % .preventDefault))}
+    ;; :style {:background-color :black
+    ;;         :color :white}}
    [Redakti
     @!redakti]])

@@ -71,14 +71,11 @@
               new-scroll-position (get-in db [:desktop/pages-scroll-positions page-ident page-args])
               on-activate-f (or (-> page :page/on-activate-f)
                                 (fn [db page-args] db))]
-          (js/console.log "XXX" "current" current-page-ident
-                          "new" page-ident
-                          "pos" current-scroll-position
-                          "store?" store-scroll-position?
-                          "restore?" restore-scroll-position? new-scroll-position)
-          (if restore-scroll-position?
-            (js/window.scrollTo 0 (or new-scroll-position 0))
-            (scroll-to-top!))
+          (scroll-to-top!)
+          (when restore-scroll-position?
+            (js/setTimeout
+             #(js/window.scrollTo 0 (or new-scroll-position 0))
+             300))
           (when-not (= [page-ident page-args] (parse-location))
             (navigate! page-ident page-args))
           (-> db

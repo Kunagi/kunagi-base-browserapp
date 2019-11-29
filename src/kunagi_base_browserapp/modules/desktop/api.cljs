@@ -53,26 +53,39 @@
   [db page-ident page-args]
   (utils/assert-spec :desktop/page-ident page-ident ::activate-page.page-ident)
   (utils/assert-spec :desktop/page-args page-args ::activate-page.page-args)
-  (let [current-page (get db :desktop/current-page-ident)
-        current-args (get-in db [:desktop/pages-args current-page])]
-    (if (and (= page-ident current-page)
-             (= page-args current-args))
+  (let [current-page-ident (get db :desktop/current-page-ident)
+        current-page-args (get-in db [:desktop/pages-args current-page-ident])]
+    (if (and (= page-ident current-page-ident)
+             (= page-args current-page-args))
       db
       (do
         (tap> [:dbg ::activate-page page-ident page-args])
         (tracking/track-screen-view! page-ident (if (empty? page-args)
                                                   nil
                                                   {"page_args" page-args}))
-        (scroll-to-top!)
-        (let [page (am/entity! [:page/ident page-ident])
+        (let [current-page (am/entity! [:page/ident current-page-ident])
+              store-scroll-position? (-> current-page :page/store-scroll-position?)
+              current-scroll-position (-> js/document .-documentElement .-scrollTop)
+              page (am/entity! [:page/ident page-ident])
+              restore-scroll-position? (-> page :page/store-scroll-position?)
+              new-scroll-position (get-in db [:desktop/pages-scroll-positions page-ident page-args])
               on-activate-f (or (-> page :page/on-activate-f)
-                                (fn [db page-args] db))
-              loc (parse-location)]
+                                (fn [db page-args] db))]
+          (js/console.log "XXX" "current" current-page-ident
+                          "new" page-ident
+                          "pos" current-scroll-position
+                          "store?" store-scroll-position?
+                          "restore?" restore-scroll-position? new-scroll-position)
+          (if restore-scroll-position?
+            (js/window.scrollTo 0 (or new-scroll-position 0))
+            (scroll-to-top!))
           (when-not (= [page-ident page-args] (parse-location))
             (navigate! page-ident page-args))
           (-> db
               (assoc :desktop/current-page-ident page-ident)
               (assoc-in [:desktop/pages-args page-ident] page-args)
+              (assoc-in [:desktop/pages-scroll-positions current-page-ident current-page-args]
+                        (when store-scroll-position? current-scroll-position))
               (on-activate-f page-args)))))))
 
 

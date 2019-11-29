@@ -75,7 +75,13 @@
           (when restore-scroll-position?
             (js/setTimeout
              #(js/window.scrollTo 0 (or new-scroll-position 0))
-             300))
+             50)
+            (js/setTimeout
+             #(js/window.scrollTo 0 (or new-scroll-position 0))
+             250)
+            (js/setTimeout
+             #(js/window.scrollTo 0 (or new-scroll-position 0))
+             500))
           (when-not (= [page-ident page-args] (parse-location))
             (navigate! page-ident page-args))
           (-> db

@@ -15,12 +15,12 @@
    :container {:background-color "#111"}})
 (def cursor-outline (str "1px solid " (-> palette :cursor)))
 (def cursor-box-shadow "0px 2px 1px -1px rgba(200,0,0,0.2), 0px 1px 1px 0px rgba(200,0,0,0.14), 0px 1px 3px 0px rgba(200,0,0,0.12)")
-(def cursor-background-color "#ddd")
+(def cursor-background-color (-> (theme/theme) .-palette .-secondary .-light)) ; "#a5d6a7")
 
 (defn NodeFrame [options buffer n path component]
   [:> mui/Paper
    {:style {:padding spacing
-            :background-color (when (= path (-> buffer :cursor)) cursor-background-color)}}
+            :background-color (when (= path (-> buffer :cursor)) (-> (theme/theme) .-palette .-secondary .-light))}}
 
    ;;{:style {:outline (when (= path (-> buffer :cursor)) cursor-outline)}}
    ;; :background (-> palette :node :background-color)
@@ -50,8 +50,8 @@
        text])
     (into
      [muic/Stack
-      {:spacing spacing
-       :style {:padding spacing}}]
+      {:spacing spacing}]
+       ;; :style {:padding spacing}}]
                ;;:background-color (-> palette :container :background-color)]
      (map-indexed
       (fn [idx _child-n]

@@ -31,10 +31,10 @@
 (defn Redakti [redakti]
   [muic/Stack
    [FeedbackBar redakti]
-   [buffer-ui/Buffer (-> redakti :buffer)]
-   [:div.DEBUG
-    [muic/Data (-> @!redakti :buffer :cursor)]
-    [muic/Data redakti]]])
+   [buffer-ui/Buffer (-> redakti :buffer)]])
+   ;; [:div.DEBUG
+   ;;  [muic/Data (-> @!redakti :buffer :cursor)]
+   ;;  [muic/Data redakti]]])
 
 
 (defn Redakti! []

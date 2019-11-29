@@ -6,15 +6,17 @@
 
 (defn update-page-path []
   (when-let [tracking-id (->  @!activated :tracking-id)]
-    (js/gtag "config"
-             tracking-id
-             (clj->js {"page_path" (-> js/window .-location .-pathname)}))))
+    (when (exists? js/gtag)
+      (js/gtag "config"
+               tracking-id
+               (clj->js {"page_path" (-> js/window .-location .-pathname)})))))
 
 
 (defn track [event-name event-params]
   (when (= "screen_view" event-name)
     (update-page-path))
-  (js/gtag "event" event-name (clj->js event-params)))
+  (when (exists? js/gtag)
+    (js/gtag "event" event-name (clj->js event-params))))
 
 
 ;;; installation
@@ -40,9 +42,9 @@
     (let [gt-config {;; "send_page_view" false
                      "anonymize_ip" (get config :anonymize-ip true)}
           gt-config-s (.stringify js/JSON (clj->js gt-config))
-          gt-set {"app_name" (get config :app-name)
-                  "app_id" (get config :app-id)
-                  "app_version" (get config :app-version)
+          gt-set {"app_name" (get config :app-name "no_app_name")
+                  "app_id" (get config :app-id "no_app_id")
+                  "app_version" (get config :app-version "0")
                   "currency" (get config :currency "EUR")}
           gt-set-s (.stringify js/JSON (clj->js gt-set))]
       (install-script-tag

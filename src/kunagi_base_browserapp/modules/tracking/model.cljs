@@ -2,6 +2,7 @@
   (:require
    [clojure.spec.alpha :as s]
 
+   [kunagi-base-browserapp.subs]
    [kunagi-base.appmodel :as am :refer [def-module def-entity-model]]
    [kunagi-base.modules.startup.model :refer [def-init-function]]
 

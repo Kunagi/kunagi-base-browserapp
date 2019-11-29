@@ -15,8 +15,11 @@
   (when-let [config @!activated]
     (when (= "screen_view" event-name)
       (update-page-path))
-    (js/gtag "event" event-name (clj->js (assoc event-params
-                                                "app_name" (-> config :app-name))))))
+    (let [event-params (assoc event-params "app_name" (-> config :app-name))
+          event-params (if-let [app-version (-> config :app-version)]
+                         (assoc event-params "app_version" app-version)
+                         event-params)]
+      (js/gtag "event" event-name (clj->js event-params)))))
 
 
 ;;; installation

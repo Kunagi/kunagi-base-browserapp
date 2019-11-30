@@ -1,5 +1,6 @@
 (ns kunagi.redakti.buffer-ui
   (:require
+   [clojure.spec.alpha :as s]
    ["@material-ui/core" :as mui]
    [mui-commons.components :as muic]
    [mui-commons.theme :as theme]
@@ -21,7 +22,7 @@
   [:> mui/Paper
    {:style {:padding spacing
             :background-color (when (= path (-> buffer :cursor)) (-> (theme/theme) .-palette .-secondary .-light))}}
-
+   [muic/Data [path (-> buffer :cursor)]]
    ;;{:style {:outline (when (= path (-> buffer :cursor)) cursor-outline)}}
    ;; :background (-> palette :node :background-color)
    ;; :padding spacing}}
@@ -38,6 +39,7 @@
     ;; [:div.Debug
     ;;  [muic/Data path]
     ;;  [muic/Data n]]])
+
 
 
 (defn Column [buffer n path]
@@ -66,13 +68,26 @@
 (defn node [buffer path]
   (let [tree (-> buffer :tree)
         n (buffer/node-by-path tree path)]
+    ;; (s/assert keyword? (-> n :redakti.node/type))
+    ;; (js/console.log "XXX" path n)
     (case (-> n :redakti.node/type)
       :column [Column buffer n path]
       :row [Row buffer n path]
-      [Leaf buffer n path])))
+      :leaf [Leaf buffer n path]
+      (throw (ex-info (str "Unsupported node type: " (-> n :redakti.node/type))
+                      {:path path
+                       :node n})))))
 
 
 (defn Buffer [buffer]
-  [:div.Buffer
-   {:style {:padding spacing}}
-   (node buffer [])])
+  [muic/ErrorBoundary
+   [:div.Buffer
+    {:style {:padding spacing}}
+    (js/console.log "BUFFER" (-> buffer :tree))
+    (node buffer [])]])
+    ;; (node {:cursor []
+    ;;        :tree {:redakti.node/type :column
+    ;;               :redakti.node/text "root"
+    ;;               :redakti.node/nodes [{:redakti.node/text "c1"
+    ;;                                     :redakti.node/type :column}]}}
+    ;;       [])]])

@@ -34,6 +34,7 @@
    :page/workarea {:req true}
    :page/toolbar {}
    :page/title-text {}
+   :page/back-button {}
    :page/on-activate-f {:spec fn?}})
 
 

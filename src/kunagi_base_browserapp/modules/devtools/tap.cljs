@@ -16,7 +16,15 @@
 (defn Record [record]
   [muic/Card
    {:style {:background-color (-> record :level card-colors)}}
-   [muic/Data record]])
+   [muic/Stack
+    [:div
+     [:span (-> record :level)]
+     " "
+     [:span (-> record :source-ns)]
+     " "
+     [:strong (-> record :source-name)]]
+    (when-let [payload (-> record :payload)]
+      [muic/Data payload])]])
 
 
 (defn Records []

@@ -55,7 +55,7 @@
   gtag('js', new Date());
 
   gtag('config', '" (-> config :tracking-id) "', " gt-config-s ");
-  gtag('set', " gt-set-s ")
+  gtag('set', " gt-set-s ");
 ")))
     ;; (set! (.-onhashchange js/window)
     ;;       #(update-page-path (-> js/window .-location .-pathname)))

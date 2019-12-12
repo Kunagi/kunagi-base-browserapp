@@ -42,4 +42,3 @@
   (add-tap #(swap! !records conj (logging-tap/o->record %)))
   db)
 
-

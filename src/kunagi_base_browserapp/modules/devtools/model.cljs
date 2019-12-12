@@ -5,11 +5,20 @@
    [kunagi-base-browserapp.modules.desktop.model :refer [def-page]]
 
    [kunagi-base-browserapp.modules.devtools.api :as impl]
-   [kunagi-base-browserapp.modules.devtools.tap :as tap]))
+   [kunagi-base-browserapp.modules.devtools.tap :as tap]
+   [kunagi-base-browserapp.modules.devtools.cards :as cards]))
 
 
 (def-module
   {:module/id ::devtools})
+
+
+(def-page
+  {:page/id         ::cards-page
+   :page/ident      :devtools-cards
+   :page/module     [:module/ident :devtools]
+   :page/title-text "devtools: [Cards]"
+   :page/workarea   [cards/Workarea]})
 
 
 (def-page

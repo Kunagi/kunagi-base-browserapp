@@ -111,7 +111,7 @@
       [:div.DesktopContent
        app-bar
        [:div
-        {:style {:margin-top "84px"}}
+        {:style {:margin-top (when app-bar "84px")}}
         [Errors]
         [Snackbars]
         [:> mui/Container

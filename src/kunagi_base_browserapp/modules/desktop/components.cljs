@@ -95,13 +95,14 @@
 
 
 (defn Desktop [{:keys [css
+                       font-family
                        app-bar
                        container-max-width
                        footer
                        workarea-guard
                        document-title-suffix]}]
   [:div.Desktop
-   {:style {:font-family "\"Roboto\", \"Helvetica\", \"Arial\", sans-serif"}}
+   {:style {:font-family (or font-family "\"Roboto\", \"Helvetica\", \"Arial\", sans-serif")}}
    [DocumentTitleSwitch document-title-suffix]
    [:> mui/CssBaseline]
    [:> mui/MuiThemeProvider

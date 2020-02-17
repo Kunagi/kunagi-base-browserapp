@@ -14,7 +14,7 @@
 
 
 (def-page
-  {:page/id         ::cards-page
+  {:page/id         ::devtools-cards
    :page/ident      :devtools-cards
    :page/module     [:module/ident :devtools]
    :page/title-text "devtools: [Cards]"
@@ -22,7 +22,7 @@
 
 
 (def-page
-  {:page/id ::tap-page
+  {:page/id ::devtools-tap
    :page/ident :devtools-tap
    :page/module [:module/ident :devtools]
    :page/title-text "devtools: tap>"

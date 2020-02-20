@@ -78,12 +78,30 @@
         title (if (fn? title) (title) title)
         title (if suffix
                 (if title
-                  (str title " - " suffix)
+                  (if (= suffix title)
+                    title
+                    (str title " - " suffix))
                   suffix)
                 title)]
     (when title
       (set! (. js/document -title) title))
     [:span.DocumentTitleSwitch]))
+
+
+(defn PageTitleSwitch [variant suffix]
+  [:div.PageTitle
+   (let [title (<subscribe [:desktop/current-page-title-text])
+         title (if (fn? title) (title) title)
+         title (if suffix
+                 (if title
+                   (str title " - " suffix)
+                   suffix)
+                 title)]
+     (when title
+       [:> mui/Typography
+        {:component :h1
+         :variant (or variant :h5)}
+        title]))])
 
 
 (defn Snackbars []

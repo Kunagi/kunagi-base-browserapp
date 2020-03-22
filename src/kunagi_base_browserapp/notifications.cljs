@@ -12,19 +12,23 @@
 
 
 (defn permission-granted? []
-  (= "granted"
-     (-> js/Notification .-permission)))
+  (and (supported?)
+       (= "granted" (-> js/Notification .-permission))))
 
 
 (defn request-permission [callback]
   (tap> [:inf ::request-permission])
-  (-> js/Notification
-      .requestPermission
-      (.then callback)))
+  (if-not (supported?)
+    (tap> [:wrn ::request-permission :notifications-not-supported])
+    (-> js/Notification
+        .requestPermission
+        (.then callback))))
 
 
 (defn show-notification [title options]
-  (try
-    (js/Notification. title (clj->js options))
-    (catch :default ex
-      (tap> [:err ::show-notification ex]))))
+  (if-not (supported?)
+    (tap> [:wrn ::show-notification :notifications-not-supported])
+    (try
+      (js/Notification. title (clj->js options))
+      (catch :default ex
+        (tap> [:err ::show-notification ex])))))

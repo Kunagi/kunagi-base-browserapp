@@ -31,7 +31,8 @@
         .-serviceWorker
         .getRegistration
         (.then (fn [registration]
-                 (-> registration (.showNotification title (clj->js options))))))
+                 (when registration
+                   (-> registration (.showNotification title (clj->js options)))))))
     (catch :default ex
       (tap> [:err ::show-notification ex]))))
 

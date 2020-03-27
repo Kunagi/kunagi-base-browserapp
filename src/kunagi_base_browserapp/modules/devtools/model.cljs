@@ -29,10 +29,10 @@
    :page/workarea [tap/Workarea]})
 
 
-(def-init-function
-  {:init-function/id ::graphed
-   :init-function/module [:module/ident :devtools]
-   :init-function/f #(impl/init-graphed %)})
+;; (def-init-function
+;;   {:init-function/id ::graphed
+;;    :init-function/module [:module/ident :devtools]
+;;    :init-function/f #(impl/init-graphed %)})
 
 
 (def-init-function

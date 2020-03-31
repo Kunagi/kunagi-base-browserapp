@@ -14,4 +14,4 @@
         param-strs (when (includes? url "?")
                      (-> url (split #"\?") last (split #"\&")))]
     (into {} (for [[k v] (map #(split % #"=") param-strs)]
-               [(keyword k) v]))))
+               [(keyword (js/decodeURIComponent k)) (js/decodeURIComponent v)]))))

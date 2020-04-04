@@ -22,7 +22,7 @@
   db)
 
 (defn- on-data-received [db data]
-  ;; (tap> [:!!! ::data-received data])
+  (tap> [:!!! ::data-received data])
   (if (= :chsk/recv (-> data :id))
     (let [event (-> data :event (second))
           event-id (first event)]
@@ -47,7 +47,7 @@
        (assoc-in [:comm-async/sente-state] state))))
 
 
-(defn- send! [db message]
+(defn send! [db message]
   (if (get-in db [:comm-async/sente-state :open?])
     (let [send-fn (get-in db [:comm-async/sente-socket :send-fn])]
       (send-fn message))
@@ -67,6 +67,11 @@
    (send! db [:kunagi-base/event event])
    db))
 
+(rf/reg-event-db
+ :comm-async/send-message
+ (fn [db [_ message]]
+   (send! db message)
+   db))
 
 (rf/reg-event-db
  :auth/server-event-not-permitted

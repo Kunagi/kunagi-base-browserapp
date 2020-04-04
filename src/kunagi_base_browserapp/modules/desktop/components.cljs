@@ -36,7 +36,8 @@
 
 (defn WorkareaSwitch []
   [muic/ErrorBoundary
-   (<subscribe [:desktop/current-page-workarea])])
+   (when-let [workarea (<subscribe [:desktop/current-page-workarea])]
+     (conj workarea (<subscribe [:desktop/current-page-args])))])
 
 
 (defn ToolbarSwitch []
